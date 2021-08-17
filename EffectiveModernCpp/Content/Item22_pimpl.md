@@ -12,7 +12,5 @@
 >
 > [EffectiveModernCppChinese/item22.md at master · kelthuzadx/EffectiveModernCppChinese · GitHub](https://github.com/kelthuzadx/EffectiveModernCppChinese/blob/master/4.SmartPointers/item22.md)
 >
-> [Effective-Modern-Cpp/04 智能指针.md at master · downdemo/Effective-Modern-Cpp · GitHub](https://github.com/downdemo/Effective-Modern-Cpp/blob/master/content/04 智能指针.md)
->
 > 
 
