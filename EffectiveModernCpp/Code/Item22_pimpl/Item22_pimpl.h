@@ -18,6 +18,6 @@ private:
 	std::unique_ptr<Impl> pimpl_;
 };
 
-//	Tips:
+// Tips:
 //	1. 对于 std::unique_ptr 而言，删除器的类型是智能指针类型的一部分
 //	2. 对于 std::shared_ptr 而言，删除器的类型并非智能指针类型的一部分
