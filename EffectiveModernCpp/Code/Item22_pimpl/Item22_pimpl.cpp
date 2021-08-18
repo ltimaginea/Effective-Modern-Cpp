@@ -1,22 +1,25 @@
 ﻿#include <iostream>
 #include <string>
 #include <vector>
-#include <memory>
 #include <utility>
 
 #include "pimpl.h"
+//#include "gadget.h"
 
 class Widget::Impl
 {
-private:
-	std::string name;
-	std::vector<double> data;
-	int i;
 public:
+	Impl(int i = 0) :i_(i) {  }
+public:
+	int GetInfo() { return i_; }
+private:
+	std::string name_;
+	std::vector<double> data_;
+	int i_;
 	// ...
 };
 
-Widget::Widget() :pimpl_(std::make_unique<Impl>())
+Widget::Widget(int i) :pimpl_(std::make_unique<Impl>(i))
 {
 
 }
@@ -45,10 +48,9 @@ Widget& Widget::operator=(Widget&& rhs) noexcept
 
 Widget::~Widget() = default;
 
-int main()
+void Widget::PrintInfo()
 {
-	Widget w;
-	return 0;
+	std::cout << pimpl_->GetInfo() << std::endl;
 }
 
 // Tips:

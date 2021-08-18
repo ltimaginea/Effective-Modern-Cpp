@@ -1,15 +1,17 @@
 #pragma once
 #include <memory>
+
 class Widget
 {
 public:
-	Widget();
+	Widget(int i = 0);
 	Widget(const Widget&);
 	Widget(Widget&&) noexcept;
 	Widget& operator=(const Widget&);
 	Widget& operator=(Widget&&) noexcept;
 	~Widget();
-
+public:
+	void PrintInfo();
 	// ...
 private:
 	// things to be hidden go here
