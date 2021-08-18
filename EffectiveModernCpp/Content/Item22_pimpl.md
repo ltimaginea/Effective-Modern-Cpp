@@ -11,7 +11,6 @@
 `interface (widget.h)`
 
 ```cpp
-// interface (widget.h)
 #pragma once
 #include <memory>
 
@@ -44,7 +43,6 @@ private:
 `implementation (widget.cpp)`
 
 ```cpp
-// implementation (widget.cpp)
 #include <iostream>
 #include <string>
 #include <vector>
@@ -106,7 +104,6 @@ void Widget::PrintInfo()
 `user (user.cpp)`
 
 ```cpp
-// user (user.cpp)
 #include "pimpl.h"
 
 int main()
