@@ -48,7 +48,7 @@ private:
 #include <vector>
 #include <utility>
 
-#include "pimpl.h"
+#include "widget.h"
 //#include "gadget.h"
 
 class Widget::Impl
@@ -104,7 +104,7 @@ void Widget::PrintInfo()
 `user (user.cpp)`
 
 ```cpp
-#include "pimpl.h"
+#include "widget.h"
 
 int main()
 {
@@ -155,9 +155,9 @@ Pimpl 打破了这种编译依赖；实现的改动不会导致重编译。结�
 
 ## 原因
 
-因为
+因为。
 
-
+![](https://github.com/ltimaginea/Effective-Modern-Cpp/blob/main/EffectiveModernCpp/Images/Item22_pimpl/deleter.png)
 
 
 
