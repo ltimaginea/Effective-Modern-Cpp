@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 
-#include "pimpl.h"
+#include "widget.h"
 //#include "gadget.h"
 
 class Widget::Impl

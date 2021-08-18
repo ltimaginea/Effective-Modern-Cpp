@@ -1,4 +1,4 @@
-#include "pimpl.h"
+#include "widget.h"
 
 int main()
 {
