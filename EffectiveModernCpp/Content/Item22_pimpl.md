@@ -153,15 +153,15 @@ Pimpl 打破了这种编译依赖；实现的改动不会导致重编译。结�
 
 对于Pimpl 习惯用法而言，并不需要在 std::unique_ptr 和 std::shared_ptr 的特性之间做出权衡。 因为对于像 Widget 的类和 Widget::Impl 这样的类之间的关系而言，他们是专属所有权关系，这让 std::unique_ptr 使用起来很合适。 然而，有必要知道，在其他情况中，当共享所有权存在时，std::shared_ptr 是很适用的选择的时候，就没有 std::unique_ptr 所必需的声明——定义（function-definition）这样的麻烦事了。
 
-Prefer to hold the Pimpl using a *unique_ptr*. It’s more efficient than using a *shared_ptr*, and correctly expresses the intent that the Pimpl object should not be shared.
+*Prefer to hold the Pimpl using a unique_ptr . It’s more efficient than using a shared_ptr, and correctly expresses the intent that the Pimpl object should not be shared.*
 
-Define and use the Pimpl object in your own implementation file. This is what keeps its details hidden.
+*Define and use the Pimpl object in your own implementation file. This is what keeps its details hidden.*
 
-In the visible class’ out-of-line constructor, allocate the Pimpl object.
+*In the visible class’ out-of-line constructor, allocate the Pimpl object.*
 
-Although both unique_ptr and shared_ptr can be instantiated with an incomplete type, but unique_ptr’s destructor requires a complete type in order to invoke delete (unlike *shared_ptr* which captures more information when it’s constructed). Because [std::unique_ptr](https://en.cppreference.com/w/cpp/memory/unique_ptr) requires that the pointed-to type is a complete type in any context where the deleter is instantiated, the special member functions must be user-declared and defined out-of-line, in the implementation file, where Widget::Impl is already defined.
+*Although both unique_ptr and shared_ptr can be instantiated with an incomplete type, but unique_ptr’s destructor requires a complete type in order to invoke delete (unlike shared_ptr which captures more information when it’s constructed). Because std::unique_ptr requires that the pointed-to type is a complete type in any context where the deleter is instantiated, the special member functions must be user-declared and defined out-of-line, in the implementation file, where Widget::Impl is already defined.*
 
-The above pattern does not make the visible class either copyable or movable by default, because C++11 is less eager to have the compiler generate default copying and moving operations for you. Because we’ve had to write a user-defined destructor, that turns off the compiler-generated move constructor and move assignment operator. If you do decide to supply copy and/or move, note that the copy assignment and move assignment operator need to be defined out of line in the implementation class for the same reason as the destructor.
+*The above pattern does not make the visible class either copyable or movable by default, because C++11 is less eager to have the compiler generate default copying and moving operations for you. Because we’ve had to write a user-defined destructor, that turns off the compiler-generated move constructor and move assignment operator. If you do decide to supply copy and/or move, note that the copy assignment and move assignment operator need to be defined out of line in the implementation class for the same reason as the destructor.*
 
 
 
