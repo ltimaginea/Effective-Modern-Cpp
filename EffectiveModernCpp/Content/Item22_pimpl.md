@@ -133,29 +133,37 @@ int main()
 
 ## 解释
 
+一个已声明但未定义的类型称为不完整类型。
+
 因为类的私有数据成员参与其对象表示，影响大小和布局，也因为类的私有成员函数参与[重载决议](https://zh.cppreference.com/w/cpp/language/overload_resolution)（这发生于成员访问检查之前），故对实现细节的任何更改都要求该类的所有用户重编译。
 
-Pimpl 打破了这种编译依赖；实现的改动不会导致重编译。结果是，若某个库在其 ABI 中使用 Pimpl，则这个库的新版本可以更改实现，并且与旧版本保持 ABI 兼容。所以它通常被称为“编译防火墙”。
+Pimpl 打破了这种编译依赖；实现的改动不会导致重编译。结果是，若某个库在其 ABI 中使用 Pimpl，则这个库的新版本可以更改实现，并且与旧版本保持 ABI 兼容。所以它通常被称为“编译防火墙”(Compilation firewall) 。
 
-在这里我把`#include`命令写出来是为了明确一点，对于`std::string`，`std::vector`和`gadget`的头文件的整体依赖依然存在。 然而，这些依赖从头文件`widget.h`（它被所有`Widget`类的用户(Users)包含，并且对他们可见）移动到了`widget.cpp`（该文件只被`Widget`类的实现者(Implementer)包含，并只对他可见）。
+在这里我把`#include`命令写出来是为了明确一点，对于`std::string`，`std::vector`和`gadget`的头文件的总体依赖依然存在。 然而，这些依赖从头文件`widget.h`（它被所有`Widget`类的用户(Users)包含，并且对他们可见）移动到了`widget.cpp`（该文件只被`Widget`类的实现者(Implementer)包含，并只对他可见）。
 
 ![](https://github.com/ltimaginea/Effective-Modern-Cpp/blob/main/EffectiveModernCpp/Images/Item22_pimpl/gotw.png)
 
 ## 实现
 
-由于接口类型的对象控制实现类型对象的生存期，指向实现的指针通常是 [std::unique_ptr](https://zh.cppreference.com/w/cpp/memory/unique_ptr)。
+优先使用 std::unique_ptr 来保存 pimpl_ 。它比使用 std::shared_ptr 更有效，并且正确表达了不应共享 pimpl_ 对象的意图。
 
-因为 [std::unique_ptr](https://zh.cppreference.com/w/cpp/memory/unique_ptr) 要求被指向类型在任何实例化删除器的语境中均为完整类型，故特殊成员函数必须为用户声明，且在实现类为完整的实现文件中类外定义。
+**因为 [std::unique_ptr](https://zh.cppreference.com/w/cpp/memory/unique_ptr) 要求被指向类型在任何实例化删除器的语境中均为完整类型，故所有特殊成员函数必须被用户在头文件 `widget.h` 中声明，且在实现文件 `widget.cpp` 内定义之，位置在 *Widget::Impl* 定义之后**。 
 
-因为当 const 成员通过非 const 成员指针调用函数时会调用实现函数的非 const 重载，故该指针必须包装于 [std::experimental::propagate_const](https://zh.cppreference.com/w/cpp/experimental/propagate_const) 或等价物中。
+然而，值得注意的是，如果我们使用 std::shared_ptr 而不是 std::unique_ptr 来做 pimpl_ 指针， 我们会发现本条款的建议不再适用。 std::unique_ptr 和 std::shared_ptr 在 pimpl_ 指针上的表现上的区别的深层原因在于，他们支持自定义删除器的方式不同。 对 std::unique_ptr 而言，删除器的类型是这个智能指针的一部分，这让编译器有可能生成更小的运行时数据结构和更快的运行代码。 这种更高效率的后果之一就是 std::unique_ptr 指向的类型，在编译器的生成特殊成员函数（如析构函数，移动操作）被调用时，必须已经是一个完整类型。 而对 std::shared_ptr 而言，删除器的类型不是该智能指针的一部分，这让它会生成更大的运行时数据结构和稍微慢点的代码，但是当编译器生成的特殊成员函数被使用的时候，指向的对象不必是一个完成类型。
 
-将所有私有数据成员和所有私有非虚成员函数置于实现类中。将所有公开、受保护和虚成员留于接口类中（对替代方案的讨论见 [GOTW #100](http://herbsutter.com/gotw/_100/)）。
+对于Pimpl 习惯用法而言，并不需要在 std::unique_ptr 和 std::shared_ptr 的特性之间做出权衡。 因为对于像 Widget 的类和 Widget::Impl 这样的类之间的关系而言，他们是专属所有权关系，这让 std::unique_ptr 使用起来很合适。 然而，有必要知道，在其他情况中，当共享所有权存在时，std::shared_ptr 是很适用的选择的时候，就没有 std::unique_ptr 所必需的声明——定义（function-definition）这样的麻烦事了。
 
-若任何私有成员需要访问公开或受保护成员，则可以将指向接口的引用或指针作为参数传递给私有函数。另外，也可以将回溯引用作为实现类的一部分维持。
+Prefer to hold the Pimpl using a *unique_ptr*. It’s more efficient than using a *shared_ptr*, and correctly expresses the intent that the Pimpl object should not be shared.
 
-## 原因
+Define and use the Pimpl object in your own implementation file. This is what keeps its details hidden.
 
-因为。
+In the visible class’ out-of-line constructor, allocate the Pimpl object.
+
+Although both unique_ptr and shared_ptr can be instantiated with an incomplete type, but unique_ptr’s destructor requires a complete type in order to invoke delete (unlike *shared_ptr* which captures more information when it’s constructed). Because [std::unique_ptr](https://en.cppreference.com/w/cpp/memory/unique_ptr) requires that the pointed-to type is a complete type in any context where the deleter is instantiated, the special member functions must be user-declared and defined out-of-line, in the implementation file, where Widget::Impl is already defined.
+
+The above pattern does not make the visible class either copyable or movable by default, because C++11 is less eager to have the compiler generate default copying and moving operations for you. Because we’ve had to write a user-defined destructor, that turns off the compiler-generated move constructor and move assignment operator. If you do decide to supply copy and/or move, note that the copy assignment and move assignment operator need to be defined out of line in the implementation class for the same reason as the destructor.
+
+
 
 ![](https://github.com/ltimaginea/Effective-Modern-Cpp/blob/main/EffectiveModernCpp/Images/Item22_pimpl/deleter.png)
 
